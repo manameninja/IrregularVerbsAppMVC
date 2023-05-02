@@ -1,0 +1,15 @@
+/* 
+  Localizable.strings
+  Verregular
+
+  Created by Даниил Павленко on 23.04.2023.
+  
+*/
+"Select verbs" = "Выбрать глаголы";
+"Train verbs" = "Тренировать глаголы";
+"Try again.." = "Попробуй еще раз..";
+"Check" = "Проверить";
+"blow" = "дуть";
+"draw" = "рисовать";
+"eat" = "есть";
+"fall" = "падать";
