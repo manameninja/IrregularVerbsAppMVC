@@ -19,6 +19,15 @@ final class TrainViewController: UIViewController {
     
     private lazy var contentView: UIView = UIView()
     
+    private lazy var pointsLabel: UILabel = {
+        let label = UILabel()
+        
+        label.text = "\(count + 1)/\(maxPoints)"
+        label.textAlignment = .center
+        
+        return label
+    }()
+    
     private lazy var infinitiveLabel: UILabel = {
         let label = UILabel()
         
@@ -82,6 +91,7 @@ final class TrainViewController: UIViewController {
     // MARK: - Properties
     private let edgeInsets = 30
     private let dataSource = IrregularVerbs.shared.selectVerbs
+    private let maxPoints = IrregularVerbs.shared.selectVerbs.count
     private var currentVerb: Verb? {
         guard dataSource.count > count else { return nil }
         return dataSource[count]
@@ -92,6 +102,11 @@ final class TrainViewController: UIViewController {
             infinitiveLabel.text = currentVerb?.infinitive
             pastSimpleTextField.text = ""
             participleTextField.text = ""
+            //Return button to normal status
+            checkButton.backgroundColor = .systemGray5
+            checkButton.setTitle("Check".localized, for: .normal)
+            //Update points
+            pointsLabel.text = "\(count + 1)/\(maxPoints)"
         }
     }
     
@@ -112,6 +127,10 @@ final class TrainViewController: UIViewController {
     private func checkAction() {
         if checkAnswers() {
             count += 1
+            if count == maxPoints {
+                pointsLabel.text = "Training is over".localized
+                showAlert()
+            }
         } else {
             checkButton.backgroundColor = .systemRed
             checkButton.setTitle("Try again..".localized, for: .normal)
@@ -123,12 +142,22 @@ final class TrainViewController: UIViewController {
         participleTextField.text?.lowercased() == currentVerb?.participle
     }
     
+    private func showAlert() {
+        let alert = UIAlertController(title: "Nice!".localized, message: "You training all words - ".localized + "\(count)/\(maxPoints)", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK".localized, style: .default,
+                                      handler: { action in
+            self.navigationController?.popViewController(animated: true)
+        }))
+        present(alert, animated: true)
+    }
+    
     private func setupUI() {
         view.backgroundColor = .white
         
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubviews([
+            pointsLabel,
             infinitiveLabel,
             pastSimpleLabel,
             pastSimpleTextField,
@@ -150,6 +179,11 @@ final class TrainViewController: UIViewController {
         
         infinitiveLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(150)
+            make.leading.trailing.equalToSuperview().inset(edgeInsets)
+        }
+        
+        pointsLabel.snp.makeConstraints { make in
+            make.top.equalTo(infinitiveLabel.snp.bottom).inset(5)
             make.leading.trailing.equalToSuperview().inset(edgeInsets)
         }
         
