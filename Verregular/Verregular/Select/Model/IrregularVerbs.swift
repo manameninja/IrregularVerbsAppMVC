@@ -25,8 +25,5 @@ final class IrregularVerbs {
             Verb(infinitive: "eat", pastSimple: "ate", participle: "eaten"),
             Verb(infinitive: "fall", pastSimple: "fell", participle: "fallen"),
         ]
-        
-        //When app is starting - all verbs is selected
-        selectVerbs = verbs
     }
 }
