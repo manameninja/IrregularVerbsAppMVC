@@ -120,6 +120,7 @@ final class TrainViewController: UIViewController {
         unregisterForKeyboardNotification()
         hideKeyboardWhenTappedAround()
         infinitiveLabel.text = dataSource.first?.infinitive
+        checkingOnEmptySelectVerbs()
     }
     
     // MARK: - Private methods
@@ -140,6 +141,19 @@ final class TrainViewController: UIViewController {
     private func checkAnswers() -> Bool {
         pastSimpleTextField.text?.lowercased() == currentVerb?.pastSimple &&
         participleTextField.text?.lowercased() == currentVerb?.participle
+    }
+    
+    private func checkingOnEmptySelectVerbs() {
+        if maxPoints == 0 {
+            pointsLabel.text = "Choice verbs in main menu".localized
+            pastSimpleTextField.isEnabled = false
+            participleTextField.isEnabled = false
+            checkButton.isHidden = true
+        } else {
+            pastSimpleTextField.isEnabled = true
+            participleTextField.isEnabled = true
+            checkButton.isHidden = false
+        }
     }
     
     private func showAlert() {
@@ -195,6 +209,7 @@ final class TrainViewController: UIViewController {
         pastSimpleTextField.snp.makeConstraints { make in
             make.top.equalTo(pastSimpleLabel.snp.bottom).offset(10)
             make.leading.trailing.equalToSuperview().inset(edgeInsets)
+            make.height.equalTo(40)
         }
         
         participleLabel.snp.makeConstraints { make in
@@ -205,11 +220,13 @@ final class TrainViewController: UIViewController {
         participleTextField.snp.makeConstraints { make in
             make.top.equalTo(participleLabel.snp.bottom).offset(10)
             make.leading.trailing.equalToSuperview().inset(edgeInsets)
+            make.height.equalTo(40)
         }
         
         checkButton.snp.makeConstraints { make in
             make.top.equalTo(participleTextField.snp.bottom).offset(100)
             make.leading.trailing.equalToSuperview().inset(edgeInsets)
+            make.height.equalTo(50)
         }
     }
 }
