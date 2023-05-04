@@ -8,7 +8,39 @@ import UIKit
 import SnapKit
 
 final class TrainViewController: UIViewController {
+    
+    enum State {
+        case select, unselect
+        
+        var image: UIImage {
+            switch self {
+            case .select:
+                return UIImage.checkmark
+            case .unselect:
+                return UIImage(systemName: "circlebadge") ?? UIImage.add
+            }
+        }
+    }
+    
     // MARK: - GUI Variables
+    private lazy var pastSimpleImageView: UIImageView = {
+        let view = UIImageView()
+        
+        view.image = State.unselect.image
+        view.contentMode = .center
+        
+        return view
+    }()
+    
+    private lazy var participleImageView: UIImageView = {
+        let view = UIImageView()
+        
+        view.image = State.unselect.image
+        view.contentMode = .center
+        
+        return view
+    }()
+    
     private lazy var scrollView: UIScrollView = {
         let view = UIScrollView()
         
@@ -116,11 +148,21 @@ final class TrainViewController: UIViewController {
         
         title = "Train verbs".localized
         setupUI()
-        registerForKeyboardNotification()
-        unregisterForKeyboardNotification()
         hideKeyboardWhenTappedAround()
         infinitiveLabel.text = dataSource.first?.infinitive
         checkingOnEmptySelectVerbs()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        registerForKeyboardNotification()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        unregisterForKeyboardNotification()
     }
     
     // MARK: - Private methods
@@ -132,15 +174,40 @@ final class TrainViewController: UIViewController {
                 pointsLabel.text = "Training is over".localized
                 showAlert()
             }
+            pastSimpleImageView.image = State.unselect.image
+            participleImageView.image = State.unselect.image
         } else {
-            checkButton.backgroundColor = .systemRed
+            checkButton.backgroundColor = UIColor(named: "MyRedColor")
             checkButton.setTitle("Try again..".localized, for: .normal)
         }
     }
     
     private func checkAnswers() -> Bool {
-        pastSimpleTextField.text?.lowercased() == currentVerb?.pastSimple &&
-        participleTextField.text?.lowercased() == currentVerb?.participle
+        pastSimpleImageView.image == State.select.image &&
+        participleImageView.image == State.select.image
+    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        
+        switch textField {
+        case pastSimpleTextField:
+            let isValidPastSimple = pastSimpleTextField.text?.lowercased() == currentVerb?.pastSimple
+            if isValidPastSimple {
+                pastSimpleImageView.image = State.select.image
+            } else {
+                pastSimpleImageView.image = State.unselect.image
+            }
+        case participleTextField:
+            let isValidParticiple = participleTextField.text?.lowercased() == currentVerb?.participle
+            
+            if isValidParticiple {
+                participleImageView.image = State.select.image
+            } else {
+                participleImageView.image = State.unselect.image
+            }
+        default: print("unknown textField")
+        }
+        
     }
     
     private func checkingOnEmptySelectVerbs() {
@@ -177,7 +244,10 @@ final class TrainViewController: UIViewController {
             pastSimpleTextField,
             participleLabel,
             participleTextField,
-            checkButton])
+            checkButton,
+            pastSimpleImageView,
+            participleImageView
+        ])
         
         setupConstraints()
     }
@@ -228,6 +298,18 @@ final class TrainViewController: UIViewController {
             make.leading.trailing.equalToSuperview().inset(edgeInsets)
             make.height.equalTo(50)
         }
+        
+        pastSimpleImageView.snp.makeConstraints { make in
+            make.width.height.equalTo(20)
+            make.top.equalTo(pastSimpleLabel.snp.bottom).offset(20)
+            make.leading.equalTo(pastSimpleTextField.snp.trailing).inset(-4)
+        }
+        
+        participleImageView.snp.makeConstraints { make in
+            make.width.height.equalTo(20)
+            make.top.equalTo(participleLabel.snp.bottom).offset(20)
+            make.leading.equalTo(participleTextField.snp.trailing).inset(-4)
+        }
     }
 }
 
@@ -247,10 +329,13 @@ extension TrainViewController: UITextFieldDelegate {
 private extension TrainViewController {
     func registerForKeyboardNotification() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_: )), name: UIResponder.keyboardWillShowNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     func unregisterForKeyboardNotification() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     @objc
